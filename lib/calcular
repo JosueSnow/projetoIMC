@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Altura e Peso',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const InputPage(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class InputPage extends StatefulWidget {
+  const InputPage({super.key});
+
+  @override
+  State<InputPage> createState() => _InputPageState();
+}
+
+class _InputPageState extends State<InputPage> {
+  final TextEditingController _alturaController = TextEditingController();
+  final TextEditingController _pesoController = TextEditingController();
+
+  @override
+  void dispose() {
+    _alturaController.dispose();
+    _pesoController.dispose();
+    super.dispose();
+  }
+
+  void _calcularIMC() {
+    double? altura = double.tryParse(_alturaController.text);
+    double? peso = double.tryParse(_pesoController.text);
+
+    if (altura != null && peso != null && altura > 0) {
+      double imc = peso / (altura * altura);
+      String classificacao;
+
+      if (imc < 18.5) {
+        classificacao = "Abaixo do peso";
+      } else if (imc < 24.9) {
+        classificacao = "Peso normal";
+      } else if (imc < 29.9) {
+        classificacao = "Sobrepeso";
+      } else {
+        classificacao = "Obesidade";
+      }
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Resultado do IMC"),
+          content: Text('Seu IMC é: $imc.toStringAsFixed(2)\nClassificação: $classificacao'),
+          actions: [
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: const Text("OK"),
+            )
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Por favor, insira valores válidos")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Informe sua altura e peso"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _alturaController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Altura (em metros)',
+                hintText: 'Ex: 1.75',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _pesoController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Peso (em kg)',
+                hintText: 'Ex: 70',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _calcularIMC,
+              child: const Text("Calcular IMC"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
